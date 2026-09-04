@@ -1,0 +1,48 @@
+# ignore: prefer-publish-to-none, this package is published.
+name: l10n_tool
+description: >
+  The Google Sheets to ARB to gen-l10n pipeline around sheety_localization, with the round-trip and
+  consistency checks that keep an authored catalog and a committed one in agreement.
+
+version: 0.1.0
+
+homepage: https://github.com/zs-dima/l10n_tool
+repository: https://github.com/zs-dima/l10n_tool
+issue_tracker: https://github.com/zs-dima/l10n_tool/issues
+
+topics:
+  - localization
+  - l10n
+  - arb
+  - google-sheets
+  - tooling
+
+platforms:
+  linux:
+  macos:
+  windows:
+
+executables:
+  generate: generate
+  verify: verify
+  seed_sheet: seed_sheet
+  pull_baseline: pull_baseline
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  # The sheet -> ARB -> Dart generator. A regular dependency so `dart run sheety_localization:…`
+  # resolves in every consumer.
+  sheety_localization: ^0.6.0
+  googleapis: ">=14.0.0 <16.0.0"
+  googleapis_auth: ^2.0.0
+  meta: ^1.16.0
+  # `package:l10n_tool/testing.dart` registers a test group.
+  test: ^1.25.0
+
+dev_dependencies:
+  lints_tool:
+    git:
+      url: https://github.com/zs-dima/lints_tool.git
+      ref: v1.0.1
