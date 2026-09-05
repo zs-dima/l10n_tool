@@ -6,6 +6,9 @@
 ///   generatedLocales: Locales.values.map((l) => l.languageCode).toSet(),
 /// );
 /// ```
+///
+/// A catalog that is still being written can turn the description rule off with
+/// `requireDescriptions: false` until its rows carry one.
 library;
 
 import 'dart:convert';
@@ -18,10 +21,16 @@ import 'package:test/test.dart';
 /// Registers a `committed l10n artefacts` group over the ARBs [config] describes.
 ///
 /// Touches no network. [generatedLocales] is the set the generated Dart exposes, so the ARBs on
-/// disk, the config and the code cannot drift apart unnoticed.
+/// disk, the config and the code cannot drift apart unnoticed. [requireDescriptions] fails a source
+/// key that carries none; a catalog authored before the rule existed sets it to false and turns it
+/// on once the rows are written.
 // A registration function: the branches are the checks it declares.
 // ignore: avoid-high-cyclomatic-complexity
-void l10nConsistencyTests(L10nConfig config, {required Set<String> generatedLocales}) {
+void l10nConsistencyTests(
+  L10nConfig config, {
+  required Set<String> generatedLocales,
+  bool requireDescriptions = true,
+}) {
   Map<String, Object?> arb(String bucket, String locale) =>
       jsonDecode(File(config.arbPath(bucket, locale)).readAsStringSync()) as Map<String, Object?>;
 
@@ -46,6 +55,7 @@ void l10nConsistencyTests(L10nConfig config, {required Set<String> generatedLoca
     });
 
     test('every key carries a description', () {
+      if (!requireDescriptions) return;
       final missing = <String>[];
       for (final bucket in config.buckets) {
         final parsed = parseArb(arb(bucket, config.source));
