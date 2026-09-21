@@ -8,7 +8,9 @@
 /// ```
 ///
 /// A catalog that is still being written can turn the description rule off with
-/// `requireDescriptions: false` until its rows carry one.
+/// `requireDescriptions: false` until its rows carry one, and the same for
+/// `requirePlaceholderDeclarations: false` while its multi-placeholder rows are being given a
+/// `placeholders` block.
 library;
 
 import 'dart:convert';
@@ -30,6 +32,7 @@ void l10nConsistencyTests(
   L10nConfig config, {
   required Set<String> generatedLocales,
   bool requireDescriptions = true,
+  bool requirePlaceholderDeclarations = true,
 }) {
   Map<String, Object?> arb(String bucket, String locale) =>
       jsonDecode(File(config.arbPath(bucket, locale)).readAsStringSync()) as Map<String, Object?>;
@@ -84,6 +87,37 @@ void l10nConsistencyTests(
         }
       }
       expect(broken, isEmpty, reason: broken.join('\n'));
+    });
+
+    test('a row with two or more placeholders declares them', () {
+      if (!requirePlaceholderDeclarations) return;
+      // gen-l10n orders the generated parameters ALPHABETICALLY unless the row declares a
+      // `placeholders` block, which fixes both the order and the types. With no block every
+      // parameter is `Object`, so a call site that passes them in SENTENCE order type-checks and
+      // ships the values swapped — silently, in whatever language reads left to right.
+      // Two rows shipped that way in one app and neither was caught by a test or a walk: a version
+      // line printed "1.0.0 app.example · AppName", and a locked setup line printed its two halves
+      // the wrong way round while a device walk recorded the reversed sentence as correct
+      // (leaksonar, 2026-09-19 and 2026-09-20). Requiring the block is what makes the sentence and
+      // the signature the same statement.
+      final undeclared = <String>[];
+      for (final bucket in config.buckets) {
+        final parsed = parseArb(arb(bucket, config.source));
+        for (final MapEntry(:key, :value) in parsed.messages.entries) {
+          if (placeholderNames(value).length < 2) continue;
+          // The index is the ARB metadata field name, not a position.
+          // ignore: avoid-accessing-collections-by-constant-index
+          final declared = parsed.meta[key]?['placeholders'];
+          if (declared is! Map || declared.isEmpty) undeclared.add('$bucket/$key');
+        }
+      }
+      expect(
+        undeclared,
+        isEmpty,
+        reason:
+            'These rows take more than one placeholder and declare none, so the generated argument '
+            'order is alphabetical rather than the order the sentence reads: $undeclared',
+      );
     });
 
     test('factual rows are localised in every locale', () {

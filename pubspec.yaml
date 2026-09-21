@@ -29,7 +29,7 @@ executables:
   pull_baseline: pull_baseline
 
 environment:
-  sdk: ^3.13.2
+  sdk: ^3.13.4
 
 dependencies:
   # The sheet -> ARB -> Dart generator. A regular dependency so `dart run sheety_localization:…`
@@ -42,7 +42,4 @@ dependencies:
   test: ^1.25.0
 
 dev_dependencies:
-  lints_tool:
-    git:
-      url: https://github.com/zs-dima/lints_tool.git
-      ref: v1.0.1
+  lints_tool: ^1.1.1
