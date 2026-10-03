@@ -6,6 +6,7 @@
 library;
 
 export 'src/arb.dart';
+export 'src/barrel.dart';
 export 'src/config.dart';
 export 'src/round_trip.dart';
 export 'src/sheets.dart' show buildRows, headerRow, pullBaseline, seedSheet;

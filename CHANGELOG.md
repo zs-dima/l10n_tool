@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`generate` no longer leaves a bare `library;` in the localization barrel.**
+  `sheety_localization:generate` writes one on every pull, and the line's lint set rejects a library
+  directive with no doc comment or annotation, so each pull landed a red analyze and was stripped by
+  hand in four apps. `stripBareLibraryDirective` removes it from `lib/localization.dart` after the
+  pull; a documented or annotated directive is kept.
+
 ## [0.1.1] - 2026-09-05
 
 ### Added

@@ -46,6 +46,7 @@ Future<void> main(List<String> args) async {
     // Without it a row with blank trailing cells is dropped entirely, source text included.
     '--include-empty',
   ]);
+  stripBareLibraryDirective('lib/localization.dart');
 
   final problems = verifyRoundTrip(config);
   if (problems.isNotEmpty) {
